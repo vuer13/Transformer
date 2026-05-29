@@ -9,10 +9,10 @@ from torch import Tensor
 
 @dataclass(frozen=True)
 class TextDatasetConfig:
-    """Congifuration for loadaing and tokenizing a text dataset."""
+    """Configuration for loading and tokenizing a text dataset."""
     input_path: str
     block_size: int         # Number of tokens in each input sequence
-    encoding: str = "gpt2"  # Tokenizer encoding to use
+    encoding_name: str = "gpt2"  # Tokenizer encoding to use
 
     train_split: float = 0.9  # Proportion of data to use for training
     device: str = "cpu"       # Device to load the dataset on
@@ -37,7 +37,7 @@ class TextTokenDataset:
         # Read the raw text data
         text = Path(config.input_path).read_text(encoding="utf-8")
         # Load the tokenizer
-        self.encoder = tiktoken.get_encoding(config.encoding)
+        self.encoder = tiktoken.get_encoding(config.encoding_name)
         # Convert text to token IDs
         token_ids = self.encoder.encode(text)
         # Store token IDs as PyTorch tensor
