@@ -107,3 +107,15 @@ class SelfAttentionHead(nn.Module):
         out = weights @ v
 
         return out
+
+
+class MultiHeadAttention(nn.Module):
+    """
+    Multiple masked self-attention heads running in parallel
+    Each SelfAttentionHead outputs: (batch, time, head_size)
+    With n_heads heads, concetenating them gives: 
+        (batch, time, n_head * head_size)
+    Since n_head * head_size = n_embd
+    The final output shape is: (batch, time, n_embd)
+    Then we apply a projection layer so the heads can mix information.
+    """
