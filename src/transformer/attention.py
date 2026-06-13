@@ -119,3 +119,50 @@ class MultiHeadAttention(nn.Module):
     The final output shape is: (batch, time, n_embd)
     Then we apply a projection layer so the heads can mix information.
     """
+    
+    def __init__(self, config = Config):
+        super().__init__()
+        
+        self.config = config
+        self.heads = nn.ModuleList([
+            SelfAttentionHead(config)
+            for _ in range(config.n_head)
+        ])
+        self.proj = nn.Linear(
+            in_features=config.n_embd,
+            out_features=config.n_embd,
+            bias=config.bias,
+        )
+        self.dropout = nn.Dropout(config.dropout)
+        
+    def forward(
+        self,
+        x: Float[Tensor, "batch time channels"],
+    ) -> Float[Tensor, "batch time channels"]:
+        """
+        Run all attention heads, concatenate their outputs and projects
+        
+        Args:
+        x: Tensor of shape (B, T, n_embd)
+        
+        Returns:
+            Tensor of shape (B, T, n_embd)
+        """
+        
+        # Each head returns shape: (B, T, head_size)
+        # Concatentating across the channel dimension gives:
+        # (B, T, n_head * head_size)
+        # Since n_head * head_size = n_embd:
+        # (B, T, n_embd)
+        out = torch.cat(
+            [head(x) for head in self.heads],
+            dim=-1,
+        )
+        
+        # Mix information from all heads
+        out = self.proj(out)
+        
+        # Apply dropout after projection
+        out = self.dropout(out)
+        
+        return out

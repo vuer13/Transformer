@@ -9,4 +9,5 @@ __all__ = [
     "TextTokenDataset", 
     "BigramLanguageModel",
     "SelfAttentionHead",
+    "MultiHeadAttention",
 ]
