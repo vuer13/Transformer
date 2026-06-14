@@ -6,19 +6,17 @@ Although the original Transformer architecture contains both an encoder and deco
 
 ## Main Model
 
-The main model will include:
-
-- token embeddings
-- positional embeddings
-- masked self-attention
-- multi-head self-attention
-- feed-forward network
-- residual connections
-- layer normalization
-- stacked Transformer blocks
-- final language modeling head
-- next-token prediction loss
-- autoregressive text generation
+- [ ] token embeddings
+- [ ] positional embeddings
+- [x] masked self-attention
+- [x] multi-head self-attention
+- [x] feed-forward network
+- [ ] residual connections
+- [ ] layer normalization
+- [ ] stacked Transformer blocks
+- [ ] final language modeling head
+- [ ] next-token prediction loss
+- [ ] autoregressive text generation
 
 ## Not Included Initially
 
