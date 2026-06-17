@@ -1,8 +1,31 @@
+import torch
 import torch.nn as nn
 from jaxtyping import Float
 from torch import Tensor
 
 from transformer.config import Config
+
+
+class LayerNorm(nn.Module):
+    """
+    Manual LayerNorm implementation
+
+    Shape: 
+        input:  (batch, time, n_embd)
+        output: (batch, time, n_embd)
+
+    LayerNorm normalizes each token vector across its channel dimension.
+    """
+    def __init__(self, config: Config, eps: float = 1e-5):
+        super().__init__()
+        # TODO
+
+    def forward(
+        self,
+        x: Float[Tensor, "batch time channels"],
+    ) -> Float[Tensor, "batch time channels"]:
+        # TODO
+        return
 
 
 class FeedForward(nn.Module):
