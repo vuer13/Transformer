@@ -18,14 +18,31 @@ class LayerNorm(nn.Module):
     """
     def __init__(self, config: Config, eps: float = 1e-5):
         super().__init__()
-        # TODO
+
+        self.eps = eps
+
+        # gamma, starts asa ones so it does not change normalized values initially
+        self.weight = nn.Parameter(torch.ones(config.n_embd))
+
+        # beta, starts as zeros so it does not shift values initally
+        if config.bias:
+            self.bias = nn.Parameter(torch.zeros(config.n_embd))
+        else:
+            self.register_parameter("bias", None)
 
     def forward(
         self,
         x: Float[Tensor, "batch time channels"],
     ) -> Float[Tensor, "batch time channels"]:
-        # TODO
-        return
+        mean = x.mean(dim=-1, keepdim=True)
+        var = x.var(dim=-1, keepdim=True, unbiased=False)
+
+        x_norm = (x-mean) / torch.sqrt(var + self.eps)
+
+        if self.bias is None:
+            return self.weight * x_norm
+
+        return self.weight * x_norm + self.bias
 
 
 class FeedForward(nn.Module):

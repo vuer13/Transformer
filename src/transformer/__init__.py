@@ -11,5 +11,6 @@ __all__ = [
     "BigramLanguageModel",
     "SelfAttentionHead",
     "MultiHeadAttention",
+    "LayerNorm",
     "FeedForward",
 ]
