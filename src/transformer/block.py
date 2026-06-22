@@ -21,10 +21,10 @@ class LayerNorm(nn.Module):
 
         self.eps = eps
 
-        # gamma, starts asa ones so it does not change normalized values initially
+        # weight, starts as a ones so it does not change normalized values initially
         self.weight = nn.Parameter(torch.ones(config.n_embd))
 
-        # beta, starts as zeros so it does not shift values initally
+        # bias, starts as zeros so it does not shift values initally
         if config.bias:
             self.bias = nn.Parameter(torch.zeros(config.n_embd))
         else:
