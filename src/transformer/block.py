@@ -3,6 +3,7 @@ import torch.nn as nn
 from jaxtyping import Float
 from torch import Tensor
 
+from transformer.attention import MultiHeadAttention
 from transformer.config import Config
 
 
@@ -72,3 +73,39 @@ class FeedForward(nn.Module):
         x: Float[Tensor, "batch time channels"],
     ) -> Float[Tensor, "batch time channels"]:
         return self.net(x)
+
+class TransformerBlock(nn.Module):
+    """
+    One Transformer block containing:
+    - LayerNorm
+    - Masked multi-head self-attention
+    - Residual connection
+    - LayerNorm
+    - Feed-forward Network
+    - Residual connection
+
+    Shape:
+        input:  (batch, time, n_embd)
+        output: (batch, time, n_embd)
+    """
+    def __init__(self, config: Config):
+        super().__init__()
+
+        self.ln1 = LayerNorm(config)
+        self.attention = MultiHeadAttention(config)
+        self.ln2 = LayerNorm(config)
+        self.feed_forward = FeedForward(config)
+
+    def forward(
+        self,
+        x: Float[Tensor, "batch time channels"],
+    ) -> Float[Tensor, "batch time channels"]:
+        # Pre-norm attention block:
+        # normalize x, run attention, then add result back to original x.
+        x = x + self.attention(self.ln1(x))
+
+        # Pre-norm feed-forward block:
+        # normalize x, run feed-forward, then add result back to original x.
+        x = x + self.feed_forward(self.ln2(x))
+
+        return x
