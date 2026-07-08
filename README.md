@@ -14,10 +14,10 @@ The main project focuses on:
 - stacked Transformer blocks
 - next-token prediction
 - baseline training
-- torch.compile and mixed precision optimization
-- Distributed Data Parallel training
 
 Later extensions:
+- torch.compile and mixed precision optimization
+- Distributed Data Parallel training
 - original Transformer encoder
 - encoder-decoder cross-attention
 - larger scale training
