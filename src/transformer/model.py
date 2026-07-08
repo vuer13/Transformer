@@ -101,3 +101,44 @@ class Model(nn.Module):
             loss = F.cross_entropy(logits_flat, targets_flat)
 
         return logits, loss
+
+    @torch.no_grad()
+    def generate(
+        self,
+        idx: Int[Tensor, "batch time"],
+        max_new_tokens: int,
+    ) -> Int[Tensor, "batch generated_time"]:
+        """
+        Generate new tokens.
+        
+        Args:
+            idx: Starting token IDs with shapae (B, T)
+            max_new_tokens: Number of new tokens to generate
+
+        Returns:
+            Token IDs with shape (B, T + max_new_tokens)
+        """
+
+        for _ in range(max_new_tokens):
+            # If idx is longer than block_size, keep only most recent tokens
+            idx_cond = idx[:, -self.config.block_size :]
+
+            # Get predictions
+            # logits: (B, T, vocab_size)
+            logits, _ = self(idx_cond)
+
+            # Final Step
+            # Shape: (B, vocab_size)
+            logits = logits[:, -1, :]
+
+            # Convert raw logits into probilities
+            probs = F.softmax(logits, dim=-1)
+
+            # Sample next token: (B, 1)
+            next_idx = torch.multinomial(probs, num_samples=1)
+
+            # Append sampled token to sequence
+            # (B, T) -> (B, T+1)
+            idx = torch.cat((idx, next_idx), dim=1)
+
+        return idx
