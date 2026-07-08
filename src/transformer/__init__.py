@@ -3,6 +3,7 @@ from transformer.data import TextDatasetConfig, TextTokenDataset
 from transformer.bigram import BigramLanguageModel
 from transformer.attention import SelfAttentionHead, MultiHeadAttention
 from transformer.block import LayerNorm, FeedForward, TransformerBlock
+from transformer.model import Model
 
 __all__ = [
     "Config", 
@@ -14,4 +15,5 @@ __all__ = [
     "LayerNorm",
     "FeedForward",
     "TransformerBlock",
+    "Model",
 ]
