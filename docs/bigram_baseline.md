@@ -2,7 +2,6 @@
 
 ## Objective
 
-
 This model is a simple test model that predicts the next token using only the current token. It does not use attention yet.
 
 The purpose of this model is to check that the basic training loop works before building the Transformer.

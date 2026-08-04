@@ -2,8 +2,6 @@
 
 ## Objective
 
-Implements feed-forward network used inside a Transformer block
-
 After attention lets tokens use context from other tokens, the feed-forward network processes each token individually.
 
 Goal:
