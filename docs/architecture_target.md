@@ -2,8 +2,6 @@
 
 This project implements a GPT-style decoder-only Transformer from scratch in PyTorch.
 
-Although the original Transformer architecture contains both an encoder and decoder, we will only implement decoder for now. 
-
 ## Main Model
 
 - [ ] token embeddings
@@ -18,7 +16,7 @@ Although the original Transformer architecture contains both an encoder and deco
 - [ ] next-token prediction loss
 - [ ] autoregressive text generation
 
-## Not Included Initially
+## Second Stage
 
 The following are not part of the first implementation:
 
