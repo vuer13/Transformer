@@ -58,7 +58,7 @@ def main() -> None:
 
     dataset = TextTokenDataset(
         TextDatasetConfig(
-            input_path="data/input.txt",
+            input_path="data/tiny_shakespeare.txt",
             block_size=block_size,
             encoding_name="gpt2",
             device=device,
