@@ -1,3 +1,4 @@
+from contextlib import nullcontext
 from pathlib import Path
 
 import torch
@@ -24,12 +25,23 @@ def get_device() -> str:
     return "cpu"
 
 
+def get_autocast_context(device: str, use_mixed_precision: bool):
+    """Use CUDA mixed precision when enabled, otherwise run normally."""
+
+    if use_mixed_precision and device == "cuda":
+        return torch.autocast(device_type="cuda", dtype=torch.float16)
+
+    return nullcontext()
+
+
 @torch.no_grad()
 def estimate_loss(
     model: Model,
     dataset: TextTokenDataset,
     batch_size: int,
     eval_iters: int,
+    device: str,
+    use_mixed_precision: bool,
 ) -> dict[str, float]:
     model.eval()
 
@@ -40,7 +52,9 @@ def estimate_loss(
 
         for _ in range(eval_iters):
             x, y = dataset.get_batch(split=split, batch_size=batch_size)
-            _, loss = model(x, y)
+
+            with get_autocast_context(device, use_mixed_precision):
+                _, loss = model(x, y)
 
             if loss is None:
                 raise RuntimeError("Loss should not be None during evaluation.")
@@ -57,6 +71,7 @@ def main() -> None:
     torch.manual_seed(1337)
 
     device = get_device()
+    use_mixed_precision = device == "cuda"
 
     run_name = "tiny_shakespeare"
     data_path = Path("data/tiny_shakespeare.txt")
@@ -104,6 +119,7 @@ def main() -> None:
     model = model.to(device)
 
     optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate)
+    scaler = torch.cuda.amp.GradScaler(enabled=use_mixed_precision)
 
     save_config(config, config_path)
 
@@ -119,6 +135,7 @@ def main() -> None:
         print(f"Resumed from checkpoint at step {start_step}")
 
     print(f"device: {device}")
+    print(f"mixed precision: {use_mixed_precision}")
     print(f"dataset: {data_path}")
     print(f"vocab size: {dataset.vocab_size}")
     print(f"parameters: {count_parameters(model):,}")
@@ -130,6 +147,8 @@ def main() -> None:
                 dataset=dataset,
                 batch_size=batch_size,
                 eval_iters=eval_iters,
+                device=device,
+                use_mixed_precision=use_mixed_precision,
             )
 
             train_loss = losses["train"]
@@ -150,14 +169,16 @@ def main() -> None:
 
         x, y = dataset.get_batch(split="train", batch_size=batch_size)
 
-        _, loss = model(x, y)
+        with get_autocast_context(device, use_mixed_precision):
+            _, loss = model(x, y)
 
         if loss is None:
             raise RuntimeError("Loss should not be None during training.")
 
         optimizer.zero_grad(set_to_none=True)
-        loss.backward()
-        optimizer.step()
+        scaler.scale(loss).backward()
+        scaler.step(optimizer)
+        scaler.update()
 
         if (step + 1) % checkpoint_interval == 0:
             save_checkpoint(
