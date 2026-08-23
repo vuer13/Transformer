@@ -34,6 +34,24 @@ def get_autocast_context(device: str, use_mixed_precision: bool):
     return nullcontext()
 
 
+def maybe_complile_model(model: Model, use_compile: bool) -> Model:
+    """
+    Optionally compiles model for faster training
+
+    torch.compile can optimize PyTorch model execution,
+    but it doesn't work on every device
+    """
+
+    if not use_compile:
+        return model
+
+    if not hasattr(torch, "compile"):
+        raise RuntimeError("torch.compile requires PyTorch 2.0 or newer.")
+    
+    print("compiling model with torch.compile...")
+    return torch.compile(model)
+
+
 @torch.no_grad()
 def estimate_loss(
     model: Model,
@@ -72,6 +90,7 @@ def main() -> None:
 
     device = get_device()
     use_mixed_precision = device == "cuda"
+    use_compile = False
 
     run_name = "tiny_shakespeare"
     data_path = Path("data/tiny_shakespeare.txt")
@@ -134,8 +153,11 @@ def main() -> None:
         )
         print(f"Resumed from checkpoint at step {start_step}")
 
+    train_model = maybe_complile_model(model, use_compile)
+
     print(f"device: {device}")
     print(f"mixed precision: {use_mixed_precision}")
+    print(f"torch compile: {use_compile}")
     print(f"dataset: {data_path}")
     print(f"vocab size: {dataset.vocab_size}")
     print(f"parameters: {count_parameters(model):,}")
@@ -143,7 +165,7 @@ def main() -> None:
     for step in range(start_step, max_iters):
         if step % eval_interval == 0:
             losses = estimate_loss(
-                model=model,
+                model=train_model,
                 dataset=dataset,
                 batch_size=batch_size,
                 eval_iters=eval_iters,
@@ -170,7 +192,7 @@ def main() -> None:
         x, y = dataset.get_batch(split="train", batch_size=batch_size)
 
         with get_autocast_context(device, use_mixed_precision):
-            _, loss = model(x, y)
+            _, loss = train_model(x, y)
 
         if loss is None:
             raise RuntimeError("Loss should not be None during training.")
