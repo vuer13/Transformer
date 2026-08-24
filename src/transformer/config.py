@@ -13,6 +13,7 @@ class Config:
     n_layer: int            # number of Transformer blocks
     dropout: float = 0.1    # dropout rate for regularization
     bias: bool = False      # whether to include bias terms in linear layers
+    use_rope: bool = False  # whether to use rotary position embeddings 
 
     def __post_init__(self):
         if self.vocab_size <= 0:
@@ -35,6 +36,9 @@ class Config:
 
         if not 0.0 <= self.dropout < 1.0:
             raise ValueError("dropout must be in [0.0, 1.0)")
+        
+        if self.use_rope and self.head_size % 2 != 0:
+            raise ValueError("RoPE requires head_size to be even")
 
     @property
     def head_size(self) -> int:

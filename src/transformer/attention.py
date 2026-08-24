@@ -5,6 +5,7 @@ from jaxtyping import Float
 from torch import Tensor
 
 from transformer.config import Config
+from transformer.rope import apply_rope
 
 
 class SelfAttentionHead(nn.Module):
@@ -77,6 +78,10 @@ class SelfAttentionHead(nn.Module):
         # q: (B, T, head_size)
         k = self.key(x)
         q = self.query(x)
+        
+        if self.config.use_rope:
+            k = apply_rope(k)
+            q = apply_rope(q)
 
         # Compute attention scores
         # q shape: (B, T, head_size)
