@@ -28,11 +28,13 @@ class Model(nn.Module):
             num_embeddings=config.vocab_size,
             embedding_dim=config.n_embd,
         )
-        self.position_embedding_table = nn.Embedding(
-            None if config.use_rope else
-            num_embeddings=config.vocab_size,
-            embedding_dim=config.n_embd,
-        )
+        if config.use_rope:
+            self.position_embedding_table = None
+        else:
+            self.position_embedding_table = nn.Embedding(
+                config.block_size,
+                config.n_embd,
+            )
         self.blocks = nn.ModuleList([
             TransformerBlock(config)
             for _ in range(config.n_layer)
