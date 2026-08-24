@@ -137,3 +137,27 @@ def test_generate_returns_expected_length() -> None:
     generated = model.generate(start, max_new_tokens=5)
 
     assert generated.shape == (1, 6)
+
+
+def test_gpt_model_with_rope_shape() -> None:
+    config = Config(
+        vocab_size=100,
+        block_size=8,
+        n_embd=32,
+        n_head=4,
+        n_layer=2,
+        dropout=0.0,
+        bias=True,
+        use_rope=True,
+    )
+
+    model = Model(config)
+
+    idx = torch.randint(0, config.vocab_size, (2, 8))
+    targets = torch.randint(0, config.vocab_size, (2, 8))
+
+    logits, loss = model(idx, targets)
+
+    assert logits.shape == (2, 8, config.vocab_size)
+    assert loss is not None
+    assert loss.shape == torch.Size([])
