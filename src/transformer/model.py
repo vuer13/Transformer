@@ -29,6 +29,7 @@ class Model(nn.Module):
             embedding_dim=config.n_embd,
         )
         self.position_embedding_table = nn.Embedding(
+            None if config.use_rope else
             num_embeddings=config.vocab_size,
             embedding_dim=config.n_embd,
         )
@@ -69,15 +70,20 @@ class Model(nn.Module):
         # tok_embd: (B, T, n_embd)
         tok_embd = self.token_embedding_table(idx)
 
-        # Position embeddings:
-        # positions: (T)
-        # pos_embd: (T, n_embd)
-        positions = torch.arange(T, device=idx.device)
-        pos_embd = self.position_embedding_table(positions)
+        if self.position_embedding_table is None:
+            # Since position information now comes from RoPE inside attention,
+            # skip learned position embeddings
+            x = tok_embd
+        else:
+            # Position embeddings:
+            # positions: (T)
+            # pos_embd: (T, n_embd)
+            positions = torch.arange(T, device=idx.device)
+            pos_embd = self.position_embedding_table(positions)
 
-        # Broadcast position embeddings aacross the batch
-        # x shape: (B, T, n_embd)
-        x = tok_embd + pos_embd
+            # Broadcast position embeddings aacross the batch
+            # x shape: (B, T, n_embd)
+            x = tok_embd + pos_embd
 
         for block in self.blocks:
             x = block(x)
