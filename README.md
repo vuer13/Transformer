@@ -2,23 +2,39 @@
 
 This project implements a GPT-style decoder-only Transformer from scratch in PyTorch.
 
-The goal is to understand how Transformers work internally.
+The goal is to understand how Transformers work internally by building each major component step by step.
 
-The main project focuses on:
-- tiktoken tokenization
+## Core Features
+
+- `tiktoken` tokenization
+- training data pipeline
+- bigram baseline model
 - masked self-attention
 - multi-head attention
 - feed-forward networks
 - residual connections
 - layer normalization
 - stacked Transformer blocks
-- next-token prediction
-- baseline training
+- next-token prediction loss
+- autoregressive text generation
+- baseline training on Tiny Shakespeare
+- checkpoint saving and loading
+- loss logging
+- pytest shape and generation tests
 
-Later extensions:
-- torch.compile and mixed precision optimization
-- Distributed Data Parallel training
+## Performance and Scaling Features
+
+- optional CUDA mixed precision training
+- optional `torch.compile` support
+- Distributed Data Parallel training script
+- Rotary Position Embeddings
+- approximate 80M parameter model preset for larger GPU experiments
+
+## Later Extensions
+
+- architecture diagrams
 - original Transformer encoder
 - encoder-decoder cross-attention
-- larger scale training
-- Rotary Position Embeddings
+- larger-scale training experiments
+- improved sampling strategies
+- more advanced datasets
